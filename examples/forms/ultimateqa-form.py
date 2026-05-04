@@ -1,12 +1,13 @@
-from test_automation import TestAutomation
+from test_flow import TestFlow
 
 def qa_form():
         if __name__ == '__main__':
-                test = TestAutomation(enable_logger=True, window_size="600,900")
+                test = TestFlow(enable_logger=True, window_size="600,900")
 
                 test.navigate("https://ultimateqa.com/filling-out-forms/")
 
-                test.wait_for_request("https://ultimateqa.com/filling-out-forms/", "GET")
+                flow = test.wait_for_request("https://ultimateqa.com/filling-out-forms/", "GET")
+                flow.assert_status(200)
 
                 test.send_keys("id", "et_pb_contact_name_0", "Test Users")
                 test.send_keys("id", "et_pb_contact_message_0", "Test message")

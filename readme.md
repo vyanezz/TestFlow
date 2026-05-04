@@ -23,7 +23,7 @@ The framework is composed of:
 - **WebDriver** → Simplified Selenium wrapper  
 - **ApiValidator** → Handles request and response validation  
 - **Embedded Proxy** → Captures network traffic during test execution  
-- **TestAutomation** → Main entry point for users  
+- **TestFlow** → Main entry point for users  
 
 ---
 

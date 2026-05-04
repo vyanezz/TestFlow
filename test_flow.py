@@ -4,7 +4,7 @@ from validators.api_validator import ApiValidator
 from utils.logger import Logger
 from modules.driver_config import DriverConfig
 
-class TestAutomation:
+class TestFlow:
 
     def __init__(
         self,

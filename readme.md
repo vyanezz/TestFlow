@@ -1,6 +1,6 @@
 # 🚀 TestFlow
 
-A lightweight Python test automation framework that combines **Selenium-based UI testing** with **network traffic validation** using an embedded proxy.
+A lightweight Python test automation framework that combines **Selenium-based UI testing** with **network traffic validation using mitmproxy**.
 
 It allows you to validate both **frontend behavior** and **backend responses** within the same test flow, providing a more complete end-to-end testing approach.
 

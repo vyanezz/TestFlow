@@ -1,38 +1,227 @@
 # 🚀 TestFlow
 
-A lightweight Python test automation framework that combines **Selenium-based UI testing** with **network traffic validation using mitmproxy**.
+**TestFlow** is a Python end-to-end testing framework that combines browser automation with HTTP traffic validation in a single workflow.
 
-It allows you to validate both **frontend behavior** and **backend responses** within the same test flow, providing a more complete end-to-end testing approach.
+Built on top of Selenium and mitmproxy, it allows you to validate not only UI behavior, but also the exact network requests and responses generated during user interactions.
 
----
-
-## ✨ Features
-
-- Simplified and intuitive Selenium WebDriver wrapper  
-- Built-in support for capturing HTTP requests  
-- Response validation (status, headers, body)  
-- Clean and readable test API  
-- Optional logging for debugging  
+This makes it possible to test full application flows the way they actually work: from click → request → response → UI result.
 
 ---
 
-## 🧱 Architecture
+# Why TestFlow?
 
-The framework is composed of:
+Most UI automation tools only validate what happens in the browser.
 
-- **WebDriver** → Simplified Selenium wrapper  
-- **ApiValidator** → Handles request and response validation  
-- **Embedded Proxy** → Captures network traffic during test execution  
-- **TestFlow** → Main entry point for users  
+But modern applications are API-driven.
+
+A test can pass visually while the backend is actually broken.
+
+For example:
+
+- The UI redirects to a dashboard
+- But the login API returns invalid or incomplete data
+- Or the wrong endpoint is called entirely
+
+TestFlow solves this by letting you inspect and validate the network layer directly inside your tests.
 
 ---
 
-## 🎯 Goal
+# Example: Login Flow
 
-Provide a simple, scalable, and easy-to-use framework for writing tests that validate both **UI interactions** and **network communication** in a unified way.
+This example shows a complete login validation.
+
+It verifies:
+
+- UI interaction (form input + click)
+- API endpoint used for login
+- HTTP method and payload
+- Backend response
+- Final UI state
+
+```python
+from test_flow import TestFlow
+
+test = TestFlow(
+    enable_logger=True,
+    headless=True
+)
+
+test.navigate("https://myapp.com/login")
+
+with test.expect_request(
+    endpoint="https://api.myapp.com/auth/login",
+    method="POST",
+    json_body={
+        "email": "john@test.com",
+        "password": "secret123"
+    }
+) as flow:
+
+    test.send_keys("id", "email", "john@test.com")
+    test.send_keys("id", "password", "secret123")
+    test.click("id", "login-button")
+
+flow.assert_status(200)
+
+flow.assert_json({
+    "success": True
+})
+
+test.assert_url_contains("/dashboard")
+
+test.stop_test()
+```
 
 ---
 
-## 🚧 Status
+# What Makes TestFlow Different?
 
-Work in progress. The framework is actively evolving.
+Instead of splitting UI and API testing into separate layers, TestFlow merges them into one execution flow.
+
+### Traditional approach:
+
+- UI test → checks page behavior
+- API test → checks backend separately
+- Manual correlation between both
+
+### TestFlow approach:
+
+```python
+with test.expect_request(
+    endpoint="/auth/login",
+    method="POST"
+):
+    test.click("id", "login-button")
+
+flow.assert_status(200)
+```
+
+A single test validates:
+
+- UI behavior
+- Request correctness
+- Backend response
+- Integration between both layers
+
+---
+
+# Core Concepts
+
+## Browser Automation
+
+Simple Selenium-based API for user actions:
+
+```python
+test.navigate(url)
+
+test.send_keys("id", "username", "john")
+
+test.click("id", "submit")
+```
+
+---
+
+## Request Validation
+
+Define expected network behavior triggered by UI actions:
+
+```python
+with test.expect_request(
+    endpoint="/api/users",
+    method="POST",
+    json_body={"name": "John"}
+):
+    test.click("id", "save-button")
+```
+
+---
+
+## Response Assertions
+
+Validate backend responses directly:
+
+```python
+flow.assert_status(200)
+
+flow.assert_json({
+    "success": True
+})
+```
+
+---
+
+## Traffic Synchronization
+
+Wait for specific requests before continuing execution:
+
+```python
+test.wait_for_request(
+    "https://api.example.com/users",
+    "GET"
+)
+```
+
+Useful for:
+
+- SPA applications
+- Async API calls
+- Page hydration
+- Background requests
+
+---
+
+# Use Cases
+
+TestFlow is useful for testing:
+
+- Login and authentication flows
+- Registration forms
+- Checkout and payment processes
+- API-driven web applications
+- Single Page Applications (SPA)
+- End-to-end integration testing
+- Regression testing
+
+---
+
+# Architecture
+
+```text
+┌──────────────────────────────┐
+│          Test Case           │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│          TestFlow            │
+│         Public API           │
+└───────┬───────────┬──────────┘
+        │           │
+        ▼           ▼
+┌─────────────┐ ┌─────────────┐
+│ Selenium    │ │ HTTP Layer  │
+│ Automation  │ │ Validation  │
+└──────┬──────┘ └──────┬──────┘
+       │               │
+       └───────┬───────┘
+               ▼
+┌──────────────────────────────┐
+│      Embedded mitmproxy      │
+│    Traffic Interception      │
+└──────────────────────────────┘
+```
+
+---
+
+# Why It Matters
+
+TestFlow is built for modern web applications where frontend and backend are tightly connected.
+
+Instead of guessing what happened behind a button click, you validate the actual HTTP traffic generated by it.
+
+This results in:
+
+- Fewer false positives
+- Stronger integration coverage
+- More realistic end-to-end tests
+- Better confidence in critical user flows
